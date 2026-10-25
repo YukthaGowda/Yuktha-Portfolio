@@ -16,19 +16,31 @@
 <body>
 <div class="noise" aria-hidden="true"></div>
 
-<!-- boot gate -->
-<div class="boot" id="boot" role="dialog" aria-label="Welcome">
-  <div class="boot-inner">
-    <pre class="boot-log" id="boot-log" aria-live="polite"></pre>
-    <button class="key" id="boot-enter" hidden>Enter</button>
-    <button class="boot-skip" id="boot-skip">Skip intro</button>
+<!-- permission gate -->
+<div class="boot" id="boot" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+  <div class="gate" id="gate">
+    <div class="gate-top">
+      <span class="gate-av" id="gate-av"></span>
+      <div><p class="gate-kicker">Permission request</p><h2 id="gate-title">Agent wants to run a tool</h2></div>
+    </div>
+    <pre class="gate-call"><span class="fn">show_portfolio</span>(
+  viewer=<span class="str">"you"</span>,
+  vibe=<span class="str">"fun"</span>,
+  bugs_in_maze=<span class="num">3</span>
+)</pre>
+    <p class="gate-why" id="gate-why">This will show you Yuktha’s work, a maze, and three bugs she has not fixed yet.</p>
+    <div class="gate-btns">
+      <button class="key" id="gate-allow">Allow</button>
+      <button class="ghost" id="gate-always">Allow always</button>
+      <button class="ghost deny" id="gate-deny">Deny</button>
+    </div>
   </div>
 </div>
 
 <header class="top">
   <a class="mark" href="#top">yuktha.gowda</a>
   <nav aria-label="Main">
-    <a href="#play">Play</a><a href="#work">Work</a><a href="#projects">Projects</a><a href="#wall" id="nav-wall" hidden>Wall</a><a href="#contact">Contact</a>
+    <a href="#play">Play</a><a href="#work">Career</a><a href="#lab">Lab</a><a href="#wall" id="nav-wall" hidden>Wall</a><a href="#contact">Contact</a>
   </nav>
   <span class="presence" id="presence" hidden><i></i><b id="presence-n">1</b> <span id="presence-l">here now</span></span>
 </header>
@@ -55,13 +67,19 @@
       <h2>The resume, but you have to earn it</h2>
       <p class="bubble"><b>Agent:</b> grab the 8 glowing chips. Each one unlocks a chapter. Don’t let the bugs catch you.</p>
     </div>
+    <div class="play-grid">
     <div class="cab">
-      <div class="hud"><span id="score">Unlocked 0/8</span><span class="lives" id="lives" aria-label="3 lives left">♥♥♥</span></div>
+      <div class="hud"><span id="score">Unlocked 0/8</span><span id="timer">0:00.0</span><span class="lives" id="lives" aria-label="3 lives left">♥♥♥</span></div>
       <div class="stage">
         <canvas id="game" aria-label="Maze game. Use arrow keys or WASD to move the agent and collect chips that open resume sections."></canvas>
         <div class="overlay" id="ov">
           <h3 id="ov-title">Insert coin</h3>
           <p id="ov-text">Arrow keys or WASD to move. On a phone, swipe or use the pad.</p>
+          <div class="score-form" id="score-form" hidden>
+            <input id="score-name" maxlength="24" placeholder="Your name" aria-label="Your name for the leaderboard">
+            <button class="key small" id="score-save">Save my time</button>
+          </div>
+          <p class="score-status" id="score-status" role="status"></p>
           <button class="key" id="ov-btn">Start</button>
         </div>
       </div>
@@ -72,16 +90,26 @@
         <button class="right" data-d="right" aria-label="Right">▶</button>
       </div>
     </div>
+    <aside class="board" id="board" hidden aria-label="Leaderboard">
+      <h3>Fastest agents</h3>
+      <p class="board-sub">Time to unlock all 8 chips</p>
+      <ol id="board-list"><li class="board-empty">No times yet. Be the first.</li></ol>
+    </aside>
+    </div>
     <p class="skipline">Not a gamer? <a href="#work">Scroll down, everything is there too.</a></p>
   </section>
 
-  <!-- experience -->
+  <!-- career as an agent trace -->
   <section id="work" class="band">
     <div class="sec-head">
-      <h2>Where I’ve shipped</h2>
-      <p class="bubble bug"><b>Glitch:</b> I tried to break every one of these. Didn’t work. Drag to look around.</p>
+      <h2>Career, as a run trace</h2>
+      <p class="bubble bug"><b>Glitch:</b> I read her logs looking for errors. Found zero. Click any step to see what went in and what came out.</p>
     </div>
-    <div class="strip" id="exp-strip" tabindex="0" aria-label="Experience, scroll sideways"></div>
+    <div class="trace" id="trace">
+      <div class="trace-head"><span class="mono">run</span> <b>yuktha.career()</b><span class="trace-meta" id="trace-meta"></span></div>
+      <div class="trace-axis" id="trace-axis" aria-hidden="true"></div>
+      <ol class="spans" id="spans"></ol>
+    </div>
   </section>
 
   <!-- projects -->
@@ -91,6 +119,72 @@
       <p class="bubble bug b-violet"><b>Race Condition:</b> I got here first. Or did I?</p>
     </div>
     <div class="strip" id="proj-strip" tabindex="0" aria-label="Projects, scroll sideways"></div>
+  </section>
+
+  <!-- lab -->
+  <section id="lab" class="band">
+    <div class="sec-head">
+      <h2>The lab: don’t read it, poke it</h2>
+      <p class="bubble"><b>Agent:</b> three of Yuktha’s ideas, shrunk into toys. Everything runs right here in your browser.</p>
+    </div>
+
+    <div class="lab">
+      <div class="lab-copy">
+        <h3>Retrieval, live</h3>
+        <p>RAG is how her agents look things up before they talk. Ask a question and watch every chunk of her resume get scored. The best three go into the context window.</p>
+        <p class="fine">No LLM here, just real retrieval (BM25) over her resume, so the answer is stitched from what it found.</p>
+      </div>
+      <div class="lab-box">
+        <form class="rag-q" id="rag-form" autocomplete="off">
+          <input id="rag-input" maxlength="120" placeholder="Ask her resume something" aria-label="Question for the retriever">
+          <button class="key small">Retrieve</button>
+        </form>
+        <div class="chipset" id="rag-suggest">
+          <button type="button">RAG pipelines</button><button type="button">worked with doctors</button><button type="button">imbalanced data</button><button type="button">React</button><button type="button">pineapple pizza</button>
+        </div>
+        <div class="chunks" id="chunks" aria-hidden="true"></div>
+        <div class="ctx" id="ctx" aria-live="polite"><p class="fine">The context window is empty. Ask something.</p></div>
+      </div>
+    </div>
+
+    <div class="lab">
+      <div class="lab-copy">
+        <h3>An agent with a conscience</h3>
+        <p>Her Causal Design Agent drafts with an LLM, then rule-based validators check every draft. Bad drafts get blocked and sent back for revision instead of reaching the user.</p>
+        <p class="fine">A simplified version of the 8-stage LangGraph workflow. Turn on chaos mode to see the validators earn their keep.</p>
+      </div>
+      <div class="lab-box">
+        <div class="graph" id="graph"></div>
+        <div class="graph-ctl">
+          <button class="key small" id="g-run">Run the agent</button>
+          <label class="toggle"><input type="checkbox" id="g-chaos"> Chaos mode</label>
+        </div>
+        <div class="graph-io">
+          <pre class="state" id="g-state" aria-label="Agent state"></pre>
+          <ol class="glog" id="g-log" aria-live="polite"></ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="lab">
+      <div class="lab-copy">
+        <h3>Where do you draw the line?</h3>
+        <p>Her autoimmune model had to catch at least 90% of sick patients while keeping false alarms under 15%. Drag the threshold and feel the tradeoff a doctor would.</p>
+        <p class="fine">Simulated patient scores, tuned to her model’s AUC of 0.93. Not real patient data.</p>
+      </div>
+      <div class="lab-box">
+        <canvas id="dist" aria-label="Score distributions for healthy and sick patients with a threshold line"></canvas>
+        <input type="range" id="thr" min="-3" max="5" step="0.01" value="0.6" aria-label="Decision threshold">
+        <div class="thr-out">
+          <canvas id="roc" aria-label="ROC curve"></canvas>
+          <div>
+            <div class="stat"><span>Sick patients caught</span><b id="t-sens"></b><i>target 90% or more</i></div>
+            <div class="stat"><span>Healthy people flagged</span><b id="t-fpr"></b><i>target under 15%</i></div>
+            <p class="verdict" id="t-verdict"></p>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- skills -->
@@ -135,9 +229,17 @@
 
   <!-- contact -->
   <section id="contact" class="band contact">
-    <h2>Let’s build something</h2>
-    <p>I’m looking for roles in AI engineering and agentic systems. The fastest way to reach me is email.</p>
-    <a class="mail" href="mailto:yuktha.gowda12@gmail.com">yuktha.gowda12@gmail.com</a>
+    <h2>Return a value</h2>
+    <p>I’m looking for roles in AI engineering and agentic systems. One tool call left. Fill in the arguments and hit Run.</p>
+    <div class="toolcall">
+      <pre><span class="fn">send_email</span>(
+  to=<span class="str">"yuktha.gowda12@gmail.com"</span>,
+  subject=<span class="str">"</span><input id="tc-subject" value="Let’s build something together" aria-label="Email subject"><span class="str">"</span>,
+  from=<span class="str">"</span><input id="tc-from" placeholder="your name" aria-label="Your name"><span class="str">"</span>
+)</pre>
+      <button class="key" id="tc-run">Run</button>
+      <ol class="glog" id="tc-log" aria-live="polite"></ol>
+    </div>
     <div class="row">
       <button class="key small" id="copy">Copy email</button>
       <a href="https://linkedin.com/in/yuktha-gowda" target="_blank" rel="noopener">LinkedIn</a>
@@ -145,6 +247,14 @@
     </div>
   </section>
 </main>
+
+<div class="cursors" id="cursors" aria-hidden="true"></div>
+<div class="bugs-layer" id="bugs-layer"></div>
+<div class="bug-hud" id="bug-hud">
+  <span class="bug-ico" aria-hidden="true"></span>
+  <span><b id="bugs-mine">0</b> squashed by you<span id="bugs-all-wrap" hidden>, <b id="bugs-all">0</b> by everyone</span></span>
+  <button id="bugs-toggle" aria-pressed="false">Pause bugs</button>
+</div>
 
 <footer><span>© 2026 Yuktha Gowda</span><span>Built by hand, no bugs were harmed.</span></footer>
 
@@ -164,5 +274,7 @@
 <script src="main.js"></script>
 <script src="game.js"></script>
 <script src="live.js"></script>
+<script src="bugs.js"></script>
+<script src="lab.js"></script>
 </body>
 </html>

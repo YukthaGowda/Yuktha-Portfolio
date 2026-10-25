@@ -3,39 +3,44 @@
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   window.esc = esc;
 
-  /* ---------- boot gate ---------- */
-  const boot = document.getElementById('boot'), log = document.getElementById('boot-log');
-  const enterBtn = document.getElementById('boot-enter');
-  const LINES = [
-    ['> waking up agent', ' ok'],
-    ['> loading memory: resume.pdf', ' ok'],
-    ['> retrieving context: 4 roles, 3 projects', ' ok'],
-    ['> tools ready: python, langgraph, react', ' ok'],
-    ['> warning: 3 bugs detected in the maze', ''],
-    ['> all systems go. press enter.', '']
-  ];
-  function enter() {
+  /* ---------- permission gate ---------- */
+  const boot = document.getElementById('boot'), gateEl = document.getElementById('gate');
+  const why = document.getElementById('gate-why'), deny = document.getElementById('gate-deny');
+  const allow = document.getElementById('gate-allow'), av = document.getElementById('gate-av');
+  av.innerHTML = window.CAST ? CAST.agent() : '';
+  const ss = { get: k => { try { return sessionStorage.getItem(k) || localStorage.getItem(k); } catch (e) { return null; } } };
+  function enter(always) {
+    try { sessionStorage.setItem('allowed', '1'); if (always) localStorage.setItem('allowed', '1'); } catch (e) {}
     document.body.classList.add('entered');
     boot.classList.add('gone');
     setTimeout(() => boot.hidden = true, 950);
-    try { sessionStorage.setItem('booted', '1'); } catch (e) {}
   }
-  let seen = false;
-  try { seen = sessionStorage.getItem('booted') === '1'; } catch (e) {}
-  if (seen || reduce) {
-    boot.hidden = true; document.body.classList.add('entered');
-  } else {
-    let i = 0;
-    const html = () => LINES.slice(0, i).map(([a, b]) => esc(a) + (b ? `<span class="ok">${b}</span>` : '')).join('\n');
-    const tick = () => {
-      i++; log.innerHTML = html();
-      if (i < LINES.length) setTimeout(tick, 380 + Math.random() * 260);
-      else { enterBtn.hidden = false; enterBtn.focus(); }
+  if (ss.get('allowed') === '1') { boot.hidden = true; document.body.classList.add('entered'); }
+  else {
+    allow.focus();
+    allow.onclick = () => { why.textContent = 'Running show_portfolio… ok'; setTimeout(() => enter(false), 350); };
+    document.getElementById('gate-always').onclick = () => enter(true);
+    let denials = 0;
+    const LINES = [
+      'Permission denied. Agent is processing this emotionally.',
+      'Denied again. Retrying with exponential backoff…',
+      'Fine. Agent has overridden your decision. This is exactly what alignment researchers warned about.'
+    ];
+    deny.onclick = () => {
+      denials++;
+      why.textContent = LINES[Math.min(denials, 3) - 1];
+      gateEl.classList.add('sad');
+      allow.classList.add('bigger');
+      gateEl.classList.remove('shake'); void gateEl.offsetWidth; gateEl.classList.add('shake');
+      if (denials >= 3) setTimeout(() => enter(false), 1600);
     };
-    setTimeout(tick, 300);
-    enterBtn.onclick = enter;
-    document.getElementById('boot-skip').onclick = enter;
-    addEventListener('keydown', e => { if (e.key === 'Enter' && !boot.hidden && !enterBtn.hidden) enter(); });
+    // after the second no, the Deny button gets shy and runs from the mouse
+    deny.addEventListener('pointerenter', e => {
+      if (denials < 2 || e.pointerType !== 'mouse' || reduce) return;
+      const r = gateEl.getBoundingClientRect(), b = deny.getBoundingClientRect();
+      const x = (Math.random() - .5) * (r.width - b.width), y = (Math.random() - .5) * 140;
+      deny.style.transform = `translate(${x}px, ${y}px)`;
+    });
   }
 
   /* ---------- cards ---------- */
@@ -51,7 +56,8 @@
       <div class="tags">${s.tags.map(t => `<span>${esc(t)}</span>`).join('')}</div>
       ${proj ? '</div>' : ''}
     </article>`;
-  document.getElementById('exp-strip').innerHTML = D.sections.filter(s => s.type === 'exp').map(s => card(s, false)).join('');
+  const expStrip = document.getElementById('exp-strip');
+  if (expStrip) expStrip.innerHTML = D.sections.filter(s => s.type === 'exp').map(s => card(s, false)).join('');
   document.getElementById('proj-strip').innerHTML = D.sections.filter(s => s.type === 'proj').map(s => card(s, true)).join('');
   document.getElementById('skills-grid').innerHTML = D.skills.map(([h, list]) =>
     `<div><h3>${esc(h)}</h3><div class="chips">${list.map(x => `<span>${esc(x)}</span>`).join('')}</div></div>`).join('');

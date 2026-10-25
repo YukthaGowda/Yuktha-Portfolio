@@ -36,7 +36,10 @@ function resize() {
   buildBoard(); draw();
 }
 
-let player, bugs, chips, lives = 3, state = 'ready', grace = 0, clock = 0, hitT = 0;
+let player, bugs, chips, lives = 3, state = 'ready', grace = 0, clock = 0, hitT = 0, runMs = 0;
+const timerEl = document.getElementById('timer');
+const fmt = ms => { const t = ms / 1000, m = Math.floor(t / 60), sec = (t % 60).toFixed(1).padStart(4, '0'); return `${m}:${sec}`; };
+window.fmtTime = fmt;
 const unlocked = new Set();
 const ent = (x, y) => ({ x, y, dir: null, next: null, p: 0 });
 function reset(full) {
@@ -148,6 +151,7 @@ function draw() {
 let last = performance.now();
 function loop(now) {
   const dt = Math.min(.05, (now - last) / 1000); last = now; clock += dt;
+  if (state === 'play' || state === 'hit') { runMs += dt * 1000; timerEl.textContent = fmt(runMs); }
   if (state === 'play') {
     moveEnt(player, 5.4, dt, choosePlayer);
     if (grace > 0) grace -= dt; else bugs.forEach(b => moveEnt(b, 3.3 + unlocked.size * .12, dt, chooseBug));
@@ -169,12 +173,19 @@ function hud() {
 }
 function start() {
   if (state === 'won') { unlocked.clear(); document.querySelectorAll('.found').forEach(f => f.hidden = true); }
+  if (unlocked.size === 0) { runMs = 0; timerEl.textContent = fmt(0); }
+  document.getElementById('score-form').hidden = true; document.getElementById('score-status').textContent = '';
   reset(true); ov.hidden = true; state = 'play';
 }
 function end(kind) {
   state = kind; ov.hidden = false;
   if (kind === 'over') { ovT.textContent = 'Build failed'; ovP.textContent = `The bugs got you. You keep the ${unlocked.size} chips you found, so the next run is shorter.`; ovB.textContent = 'Try again'; }
-  else { ovT.textContent = 'All 8 unlocked'; ovP.textContent = 'You’ve seen the whole resume. Now imagine what I could build on your team.'; ovB.textContent = 'Play again'; }
+  else {
+    ovT.textContent = 'All 8 unlocked in ' + fmt(runMs);
+    ovP.textContent = 'You’ve seen the whole resume. Now imagine what I could build on your team.';
+    ovB.textContent = 'Play again';
+    dispatchEvent(new CustomEvent('game:won', { detail: { ms: Math.round(runMs) } }));
+  }
 }
 ovB.onclick = start;
 

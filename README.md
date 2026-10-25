@@ -17,6 +17,9 @@ Plain HTML, CSS and JavaScript. No build step.
 | `live.js` | Live visitor counter and guestbook (Supabase) |
 | `config.js` | Your Supabase keys go here |
 | `supabase.sql` | Database setup, run once |
+| `supabase-v2.sql` | Leaderboard and bug counter, run once after `supabase.sql` |
+| `bugs.js` | Bugs that crawl across the page |
+| `lab.js` | Career trace, retrieval playground, agent workflow, threshold toy and the tool-call contact |
 
 ## Run it locally
 
@@ -60,3 +63,16 @@ Every `git push` to `main` redeploys the site automatically.
 - Add a "Code" link on each project card pointing to its GitHub repo (add a `link` field in `data.js` and render it in `main.js`).
 - Add a short demo GIF of the Causal Design Agent as that card's cover instead of the generated art.
 - Track how many people beat the game by adding a `wins` table in Supabase.
+
+## Version 2 features
+
+**Leaderboard and global bug counter:** run `supabase-v2.sql` in the Supabase SQL Editor once.
+
+**Live cursors:** nothing to set up. They use the same Supabase connection as the visitor counter.
+
+## Version 3: the fun update
+
+- **Permission gate:** visitors approve `show_portfolio()` like an agent tool call. Try clicking Deny a few times.
+- **Career as a run trace:** each job is a span with inputs, outputs and a timeline bar. Edit the `SPANS` list at the top of `lab.js` to change the fun inputs and outputs.
+- **The lab:** a BM25 retrieval playground over the resume, the Causal Design Agent workflow with validators (edit `STAGES` in `lab.js` to match your real stage names), and a threshold slider for the autoimmune model.
+- **Contact as a tool call:** `send_email(...)` with editable arguments and a Run button.
