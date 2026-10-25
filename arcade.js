@@ -148,7 +148,7 @@ const I = {
 const DUR = 60;
 let ig = { st: 'idle' }, pills = [];
 function iStart() {
-  pills.forEach(p => p.el.remove()); pills = [];
+  arena.querySelectorAll('.pill,.pop').forEach(el => el.remove()); pills = [];
   ig = { st: 'play', t: 0, score: 0, shields: 3, blocked: 0, bad: 0, wrong: 0, delivered: 0, next: .6, last: performance.now() };
   I.ov.hidden = true; document.querySelector('.score-form[data-game="inject"]').hidden = true;
   document.querySelector('.score-status[data-game="inject"]').textContent = '';
@@ -208,7 +208,7 @@ function iTick(now) {
 }
 requestAnimationFrame(iTick);
 function iEnd() {
-  ig.st = 'done'; pills.forEach(p => kill(p));
+  ig.st = 'done'; pills.slice().forEach(p => kill(p));
   const score = Math.max(0, Math.min(5000, ig.score));
   I.ov.hidden = false;
   I.ovT.textContent = ig.shields <= 0 ? `Agent compromised, ${score} points` : `Agent survived, ${score} points`;

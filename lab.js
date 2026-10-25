@@ -5,60 +5,6 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const byId = id => D.sections.find(s => s.id === id);
 
 /* =========================================================
-   1. Career as an agent run trace
-   ========================================================= */
-const START = new Date(2020, 9, 1), END = new Date(2027, 6, 1), NOW = new Date(2026, 9, 24);
-const SPANS = [
-  { fn: 'school.bnmit', title: 'B.E. Computer Science and Engineering', from: [2020, 10], to: [2024, 6],
-    input: { city: 'Bangalore', fuel: 'filter coffee' }, output: { degree: 'B.E. CSE', side_quest: 'CNN skin lesion paper, published in TIJER' } },
-  { fn: 'intern.ict_academy', id: 'ict', from: [2023, 9], to: [2023, 10],
-    input: { stack: ['React'], weeks: 6 }, output: { shipped: 'responsive React platform' } },
-  { fn: 'intern.varcons', id: 'var', from: [2024, 3], to: [2024, 4],
-    input: { data: 'SQL', team: 'Agile' }, output: { dashboards: 'Tableau', modules_delivered: 2 } },
-  { fn: 'job.zennial_pro', id: 'zen', from: [2024, 8], to: [2025, 8],
-    input: { city: 'Hyderabad', product: 'Smart Recruits' }, output: { shipped: 'LLM candidate screening', pipeline: 'RAG matching', hallucinations: 'fewer' } },
-  { fn: 'school.stevens', title: 'M.S. Engineering Management, Stevens Institute of Technology', from: [2025, 9], to: [2027, 5],
-    input: { city: 'Hoboken, New Jersey', degree: 'M.S. Engineering Management' }, output: { status: 'in progress', side_quest: 'IEEE paper accepted' } },
-  { fn: 'research.stevens_ra', id: 'ra', from: [2026, 5], to: null,
-    input: { tools: ['Synthesia', 'Riverside', 'Canvas'] }, output: { course_production: 'automated end to end' } },
-  { fn: 'next_role', title: 'Her next role', from: [2026, 11], to: null, pending: true,
-    input: { looking_for: 'AI engineering, agentic systems', available: 'now' }, output: null }
-];
-const pct = d => Math.max(0, Math.min(100, (d - START) / (END - START) * 100));
-const mkDate = a => new Date(a[0], a[1] - 1, 1);
-const dur = (a, b) => { const m = (b.getFullYear() - a.getFullYear()) * 12 + b.getMonth() - a.getMonth() + 1; return m < 12 ? `${m} mo` : `${Math.floor(m / 12)}y ${m % 12}mo`; };
-const json = o => o === null ? '<span class="nul">null</span>  <span class="cmt">// waiting on you</span>' :
-  '{\n' + Object.entries(o).map(([k, v]) => `  <span class="k">${k}</span>: ${Array.isArray(v) ? '[' + v.map(x => `<span class="str">"${esc(x)}"</span>`).join(', ') + ']' : typeof v === 'number' ? `<span class="num">${v}</span>` : `<span class="str">"${esc(v)}"</span>`}`).join(',\n') + '\n}';
-
-const axis = document.getElementById('trace-axis');
-axis.innerHTML = [2021, 2022, 2023, 2024, 2025, 2026, 2027].map(y => `<span style="left:${pct(new Date(y, 0, 1))}%">${y}</span>`).join('') +
-  `<span class="now" style="left:${pct(NOW)}%">today</span>`;
-const spansEl = document.getElementById('spans');
-SPANS.forEach((sp, i) => {
-  const a = mkDate(sp.from), b = sp.to ? mkDate(sp.to) : NOW, sec = sp.id ? byId(sp.id) : null;
-  const future = sp.to && b > NOW;
-  const status = sp.pending ? '<span class="st run">running</span>' : (sp.to && !future ? '<span class="st ok">ok</span>' : '<span class="st live">live</span>');
-  const li = document.createElement('li');
-  li.className = 'span' + (sp.pending ? ' pending' : '');
-  li.innerHTML = `
-    <button class="span-row" aria-expanded="false">
-      <span class="span-name"><span class="mono">${sp.fn}()</span>${status}<span class="dur">${sp.pending ? 'pending' : dur(a, sp.to && !future ? b : NOW)}</span>${sec ? `<span class="found" data-found="${sec.id}" hidden>Unlocked</span>` : ''}</span>
-      <span class="span-lane"><span class="bar${future ? ' future' : ''}" style="left:${pct(a)}%;width:${Math.max(1.2, pct(b) - pct(a))}%;--cut:${future ? ((NOW - a) / (b - a) * 100).toFixed(1) : 100}%"></span></span>
-    </button>
-    <div class="span-body" hidden>
-      <p class="span-title">${esc(sec ? `${sec.title}, ${sec.org}` : sp.title)}</p>
-      <div class="io"><div><b>input</b><pre>${json(sp.input)}</pre></div><div><b>output</b><pre>${json(sp.output)}</pre></div></div>
-      ${sec ? `<ul>${sec.b.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
-      ${sp.pending ? '<button class="key small" data-return>Return a value</button>' : ''}
-    </div>`;
-  const row = li.querySelector('.span-row'), body = li.querySelector('.span-body');
-  row.onclick = () => { const open = body.hidden; body.hidden = !open; row.setAttribute('aria-expanded', open); li.classList.toggle('open', open); };
-  li.querySelector('[data-return]')?.addEventListener('click', () => document.getElementById('contact').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }));
-  spansEl.appendChild(li);
-});
-document.getElementById('trace-meta').textContent = `${SPANS.length} spans, 0 errors, 1 still running`;
-
-/* =========================================================
    2. Retrieval playground (BM25 over the resume)
    ========================================================= */
 const chunks = [];
