@@ -1,0 +1,62 @@
+# Yuktha Gowda: portfolio
+
+A playable portfolio. Visitors boot up an AI agent, steer it through a circuit-board maze to unlock resume chapters, fling through draggable project cards, see how many people are on the site live, and leave a drawing on a shared guestbook wall.
+
+Plain HTML, CSS and JavaScript. No build step.
+
+## Files
+
+| File | What it does |
+| --- | --- |
+| `index.html` | Page structure |
+| `styles.css` | All styling |
+| `data.js` | **Your resume content.** Edit this to update jobs, projects and skills |
+| `cast.js` | The characters (Agent and the three bugs) and the eyes that follow the cursor |
+| `main.js` | Boot intro, cards, draggable strips, copy-email button |
+| `game.js` | The maze game |
+| `live.js` | Live visitor counter and guestbook (Supabase) |
+| `config.js` | Your Supabase keys go here |
+| `supabase.sql` | Database setup, run once |
+
+## Run it locally
+
+Open the folder in VS Code, install the **Live Server** extension, right-click `index.html` and choose **Open with Live Server**. (Double-clicking the file also works, but Live Server reloads as you edit.)
+
+## Turn on the live counter and guestbook (about 10 minutes)
+
+Without this step the site works fine; the counter and the guestbook section simply stay hidden.
+
+1. Create a free account at supabase.com and click **New project**. Pick any name and a strong database password, and choose the region closest to you (East US).
+2. When it's ready, open **SQL Editor**, click **New query**, paste everything from `supabase.sql`, and click **Run**.
+3. Go to **Project Settings > API**. Copy the **Project URL** and the **anon public** key.
+4. Paste them into `config.js`:
+   ```js
+   window.SUPABASE_URL = "https://xxxx.supabase.co";
+   window.SUPABASE_ANON_KEY = "eyJ...";
+   ```
+5. Reload the page. You'll see the "here now" counter in the header and the **Leave your mark** wall near the bottom. Open the site in two browser windows to watch both update live.
+
+The anon key is designed to be public. The policies in `supabase.sql` only let visitors read the wall and add new drawings; nobody can edit or delete anything except you. To remove a drawing, open **Table Editor > guestbook** in Supabase and delete the row. The site also limits each visitor to one post per minute.
+
+## Put it online with Vercel
+
+1. Create a new GitHub repository (for example `portfolio`) and push this folder to it:
+   ```bash
+   git init
+   git add .
+   git commit -m "Portfolio v1"
+   git branch -M main
+   git remote add origin https://github.com/<your-username>/portfolio.git
+   git push -u origin main
+   ```
+2. Go to vercel.com, sign in with GitHub, click **Add New > Project**, and import the repository.
+3. Framework preset: **Other**. Leave build settings empty. Click **Deploy**.
+4. Optional: in the project's **Settings > Domains**, add a custom domain such as `yukthagowda.dev`.
+
+Every `git push` to `main` redeploys the site automatically.
+
+## Ideas for making it yours
+
+- Add a "Code" link on each project card pointing to its GitHub repo (add a `link` field in `data.js` and render it in `main.js`).
+- Add a short demo GIF of the Causal Design Agent as that card's cover instead of the generated art.
+- Track how many people beat the game by adding a `wins` table in Supabase.

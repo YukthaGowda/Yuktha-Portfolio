@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Yuktha Gowda, AI engineer</title>
+<meta name="description" content="Yuktha Gowda builds agentic AI systems: LLM workflows, RAG pipelines and the tools that make them safe to ship.">
+<meta property="og:title" content="Yuktha Gowda, AI engineer">
+<meta property="og:description" content="A portfolio you can play. Steer the agent, dodge the bugs, unlock the resume.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="noise" aria-hidden="true"></div>
+
+<!-- boot gate -->
+<div class="boot" id="boot" role="dialog" aria-label="Welcome">
+  <div class="boot-inner">
+    <pre class="boot-log" id="boot-log" aria-live="polite"></pre>
+    <button class="key" id="boot-enter" hidden>Enter</button>
+    <button class="boot-skip" id="boot-skip">Skip intro</button>
+  </div>
+</div>
+
+<header class="top">
+  <a class="mark" href="#top">yuktha.gowda</a>
+  <nav aria-label="Main">
+    <a href="#play">Play</a><a href="#work">Work</a><a href="#projects">Projects</a><a href="#wall" id="nav-wall" hidden>Wall</a><a href="#contact">Contact</a>
+  </nav>
+  <span class="presence" id="presence" hidden><i></i><b id="presence-n">1</b> <span id="presence-l">here now</span></span>
+</header>
+
+<main id="top">
+  <!-- hero -->
+  <section class="hero">
+    <h1 class="name" aria-label="Yuktha Gowda"><span>YUKTHA</span><span>GOWDA</span></h1>
+    <div class="cast" aria-hidden="true">
+      <div class="actor agent-actor" id="hero-agent"></div>
+      <div class="actor bug-actor b1" data-bug="#FF6B8B"></div>
+      <div class="actor bug-actor b2" data-bug="#FFB547"></div>
+      <div class="actor bug-actor b3" data-bug="#C59BFF"></div>
+    </div>
+    <div class="hero-foot">
+      <p class="tagline">I build agentic AI systems: LLM workflows, RAG pipelines and the guardrails that make them safe to ship.</p>
+      <p class="meet">Meet the crew. That’s Agent, my little AI. The other three are Glitch, Null and Race Condition, and they really want to eat my resume.</p>
+    </div>
+  </section>
+
+  <!-- game -->
+  <section id="play" class="band">
+    <div class="sec-head">
+      <h2>The resume, but you have to earn it</h2>
+      <p class="bubble"><b>Agent:</b> grab the 8 glowing chips. Each one unlocks a chapter. Don’t let the bugs catch you.</p>
+    </div>
+    <div class="cab">
+      <div class="hud"><span id="score">Unlocked 0/8</span><span class="lives" id="lives" aria-label="3 lives left">♥♥♥</span></div>
+      <div class="stage">
+        <canvas id="game" aria-label="Maze game. Use arrow keys or WASD to move the agent and collect chips that open resume sections."></canvas>
+        <div class="overlay" id="ov">
+          <h3 id="ov-title">Insert coin</h3>
+          <p id="ov-text">Arrow keys or WASD to move. On a phone, swipe or use the pad.</p>
+          <button class="key" id="ov-btn">Start</button>
+        </div>
+      </div>
+      <div class="pad" aria-label="Direction pad">
+        <button class="up" data-d="up" aria-label="Up">▲</button>
+        <button class="left" data-d="left" aria-label="Left">◀</button>
+        <button class="down" data-d="down" aria-label="Down">▼</button>
+        <button class="right" data-d="right" aria-label="Right">▶</button>
+      </div>
+    </div>
+    <p class="skipline">Not a gamer? <a href="#work">Scroll down, everything is there too.</a></p>
+  </section>
+
+  <!-- experience -->
+  <section id="work" class="band">
+    <div class="sec-head">
+      <h2>Where I’ve shipped</h2>
+      <p class="bubble bug"><b>Glitch:</b> I tried to break every one of these. Didn’t work. Drag to look around.</p>
+    </div>
+    <div class="strip" id="exp-strip" tabindex="0" aria-label="Experience, scroll sideways"></div>
+  </section>
+
+  <!-- projects -->
+  <section id="projects" class="band">
+    <div class="sec-head">
+      <h2>Things I built</h2>
+      <p class="bubble bug b-violet"><b>Race Condition:</b> I got here first. Or did I?</p>
+    </div>
+    <div class="strip" id="proj-strip" tabindex="0" aria-label="Projects, scroll sideways"></div>
+  </section>
+
+  <!-- skills -->
+  <section id="skills" class="band">
+    <div class="sec-head">
+      <h2>The toolkit</h2>
+      <p class="bubble bug b-amber"><b>Null:</b> nothing to see here. Just kidding, it’s a lot.</p>
+    </div>
+    <div class="skills" id="skills-grid"></div>
+    <div class="edu">
+      <div><h3>M.S. Engineering Management</h3><p>Stevens Institute of Technology, New Jersey. 2025 to 2027</p></div>
+      <div><h3>B.E. Computer Science and Engineering</h3><p>BNM Institute of Technology, Bangalore. 2020 to 2024</p></div>
+    </div>
+  </section>
+
+  <!-- guestbook (shows only when Supabase is configured) -->
+  <section id="wall" class="band" hidden>
+    <div class="sec-head">
+      <h2>Leave your mark</h2>
+      <p class="bubble"><b>Agent:</b> draw something for Yuktha. It shows up for everyone, live.</p>
+    </div>
+    <div class="wall-grid">
+      <div class="pad-card">
+        <div class="tools" role="toolbar" aria-label="Drawing tools">
+          <button class="tool on" data-tool="pen" aria-pressed="true">Pen</button>
+          <button class="tool" data-tool="spray" aria-pressed="false">Spray</button>
+          <button class="tool" data-tool="eraser" aria-pressed="false">Eraser</button>
+          <span class="swatches" id="swatches"></span>
+          <button class="tool" id="clear">Clear</button>
+        </div>
+        <canvas id="draw" width="480" height="320" aria-label="Drawing pad"></canvas>
+        <div class="post-row">
+          <input id="gb-name" maxlength="40" placeholder="Your name" aria-label="Your name">
+          <input id="gb-msg" maxlength="140" placeholder="A short note (optional)" aria-label="A short note">
+          <button class="key small" id="gb-post">Post to wall</button>
+        </div>
+        <p class="gb-status" id="gb-status" role="status"></p>
+      </div>
+      <div class="wall" id="wall-list" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- contact -->
+  <section id="contact" class="band contact">
+    <h2>Let’s build something</h2>
+    <p>I’m looking for roles in AI engineering and agentic systems. The fastest way to reach me is email.</p>
+    <a class="mail" href="mailto:yuktha.gowda12@gmail.com">yuktha.gowda12@gmail.com</a>
+    <div class="row">
+      <button class="key small" id="copy">Copy email</button>
+      <a href="https://linkedin.com/in/yuktha-gowda" target="_blank" rel="noopener">LinkedIn</a>
+      <span id="toast" role="status"></span>
+    </div>
+  </section>
+</main>
+
+<footer><span>© 2026 Yuktha Gowda</span><span>Built by hand, no bugs were harmed.</span></footer>
+
+<dialog id="dlg" aria-labelledby="c-title">
+  <div class="cart-top"><span id="c-kind"></span><span id="c-count"></span></div>
+  <div class="cart-body">
+    <h3 id="c-title"></h3><p class="org" id="c-org"></p>
+    <div id="c-content"></div>
+    <button class="key" id="c-go">Keep playing</button>
+  </div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script src="cast.js"></script>
+<script src="main.js"></script>
+<script src="game.js"></script>
+<script src="live.js"></script>
+</body>
+</html>
