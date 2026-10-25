@@ -1,55 +1,8 @@
-// Career trace, retrieval playground, agent workflow, threshold toy and tool-call contact.
+// Agent workflow, threshold toy and tool-call contact.
 (() => {
 const D = window.DATA, esc = window.esc;
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const byId = id => D.sections.find(s => s.id === id);
-
-/* =========================================================
-   2. Retrieval playground (BM25 over the resume)
-   ========================================================= */
-const chunks = [];
-D.sections.filter(s => s.type !== 'skills').forEach(s => s.b.forEach(t => chunks.push({ src: s.title, text: t, extra: s.tags.join(' ') })));
-D.skills.forEach(([h, l]) => chunks.push({ src: 'Skills: ' + h, text: l.join(', '), extra: '' }));
-chunks.push({ src: 'Education', text: 'M.S. Engineering Management at Stevens Institute of Technology, and a B.E. in Computer Science and Engineering from BNM Institute of Technology in Bangalore.', extra: 'degree university school study' });
-const STOP = new Set('a an the and or of to in on for with by at from is are was were be has have had she her he it its that this what which who how does did do can could about any some into as'.split(' '));
-const SYN = { doctor: 'clinical', doctors: 'clinical', medical: 'clinical disease', health: 'clinical disease', llm: 'llm openai gpt', llms: 'llm', ai: 'llm agentic ai', agent: 'agentic', agents: 'agentic', retrieval: 'rag retrieval', frontend: 'react', ui: 'react', web: 'react', imbalance: 'imbalanced smote', imbalanced: 'imbalanced smote', dashboard: 'dashboards', dashboards: 'dashboards tableau', paper: 'paper published ieee', papers: 'paper published', research: 'paper published research', images: 'image lesion', image: 'lesion cnn', hiring: 'recruiter candidate', recruiting: 'recruiter candidate' };
-const stem = w => w.replace(/(ing|ed|es|s)$/, '').slice(0, 9);
-const tok = t => t.toLowerCase().replace(/[^a-z0-9+ ]/g, ' ').split(/\s+/).filter(w => w && !STOP.has(w));
-const docs = chunks.map(c => tok(c.text + ' ' + c.src + ' ' + c.extra).map(stem));
-const avgdl = docs.reduce((a, d) => a + d.length, 0) / docs.length;
-const df = {}; docs.forEach(d => new Set(d).forEach(w => df[w] = (df[w] || 0) + 1));
-function bm25(q) {
-  let terms = tok(q); terms = terms.concat(...terms.map(t => SYN[t] ? tok(SYN[t]) : [])); terms = [...new Set(terms.map(stem))];
-  return docs.map(d => terms.reduce((s, t) => {
-    const f = d.filter(w => w === t).length; if (!f) return s;
-    const idf = Math.log(1 + (docs.length - df[t] + .5) / (df[t] + .5));
-    return s + idf * f * 2.2 / (f + 1.2 * (.25 + .75 * d.length / avgdl));
-  }, 0));
-}
-const chunksEl = document.getElementById('chunks'), ctx = document.getElementById('ctx');
-chunksEl.innerHTML = chunks.map(c => `<div class="chunk"><b>${esc(c.src)}</b><span>${esc(c.text.slice(0, 54))}…</span><i><em></em></i></div>`).join('');
-const tiles = [...chunksEl.children];
-function retrieve(q) {
-  q = q.trim(); if (!q) return;
-  const t0 = performance.now(), sc = bm25(q), ms = performance.now() - t0;
-  const max = Math.max(...sc) || 1;
-  const top = sc.map((s, i) => [s, i]).filter(x => x[0] > 0).sort((a, b) => b[0] - a[0]).slice(0, 3);
-  tiles.forEach((el, i) => {
-    el.classList.remove('top'); el.style.setProperty('--w', '0%');
-    setTimeout(() => { el.style.setProperty('--w', (sc[i] / max * 100).toFixed(0) + '%'); }, reduce ? 0 : i * 18);
-  });
-  setTimeout(() => {
-    top.forEach(([, i]) => tiles[i].classList.add('top'));
-    if (!top.length) {
-      ctx.innerHTML = `<p class="ctx-h">0 relevant chunks in ${ms.toFixed(1)} ms</p><p>Either Yuktha hasn’t done that yet, or you asked about something gloriously off-topic. Agent refuses to make things up.</p>`;
-      return;
-    }
-    ctx.innerHTML = `<p class="ctx-h">Top ${top.length} of ${chunks.length} chunks, retrieved in ${ms.toFixed(1)} ms</p>` +
-      top.map(([s, i], k) => `<p class="ctx-c"><span class="cite">${k + 1}</span>${esc(chunks[i].text)} <em>(${esc(chunks[i].src)}, score ${s.toFixed(2)})</em></p>`).join('');
-  }, reduce ? 0 : tiles.length * 18 + 250);
-}
-document.getElementById('rag-form').addEventListener('submit', e => { e.preventDefault(); retrieve(document.getElementById('rag-input').value); });
-document.querySelectorAll('#rag-suggest button').forEach(b => b.onclick = () => { document.getElementById('rag-input').value = b.textContent; retrieve(b.textContent); });
 
 /* =========================================================
    3. Agent workflow with validators (simplified LangGraph)
