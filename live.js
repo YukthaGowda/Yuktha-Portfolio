@@ -62,43 +62,63 @@
     room.send({ type: 'broadcast', event: 'cur', payload: { id: me, x: e.clientX / innerWidth, y: e.pageY / document.documentElement.scrollHeight, c: myColor, n: label() } });
   }, { passive: true });
 
-  /* ---------- leaderboard ---------- */
+  /* ---------- leaderboard (one per arcade game) ---------- */
   const board = document.getElementById('board'), list = document.getElementById('board-list');
+  const META = {
+    maze:   { title: 'Fastest agents', sub: 'Time to unlock all 8 chips', col: 'ms', asc: true, fmt: v => window.fmtTime ? window.fmtTime(v) : (v / 1000).toFixed(1) + 's' },
+    facts:  { title: 'Best lie detectors', sub: 'Hallucination or Fact? points', col: 'points', asc: false, fmt: v => v + ' pts' },
+    inject: { title: 'Top defenders', sub: 'Injection Defense points', col: 'points', asc: false, fmt: v => v + ' pts' }
+  };
+  let current = 'maze';
   board.hidden = false;
-  async function loadBoard(highlightId) {
-    const { data, error } = await sb.from('scores').select('id,name,ms').order('ms', { ascending: true }).limit(10);
-    if (error) { list.innerHTML = '<li class="board-empty">Leaderboard couldn’t load. Run supabase-v2.sql.</li>'; return; }
-    if (!data.length) { list.innerHTML = '<li class="board-empty">No times yet. Be the first.</li>'; return; }
+  async function loadBoard(game = current, highlightId) {
+    const m = META[game];
+    document.getElementById('board-title').textContent = m.title;
+    document.getElementById('board-sub').textContent = m.sub;
+    const { data, error } = await sb.from('scores').select(`id,name,${m.col}`).eq('game', game).not(m.col, 'is', null)
+      .order(m.col, { ascending: m.asc }).limit(10);
+    if (game !== current) return;
+    if (error) { list.innerHTML = '<li class="board-empty">Leaderboard couldn’t load. Run supabase-v3.sql in Supabase.</li>'; return; }
+    if (!data.length) { list.innerHTML = '<li class="board-empty">No scores yet. Be the first.</li>'; return; }
     list.innerHTML = '';
     data.forEach(r => {
       const li = document.createElement('li'); if (r.id === highlightId) li.className = 'you';
       const n = document.createElement('span'); n.textContent = r.name;
-      const t = document.createElement('b'); t.textContent = window.fmtTime ? window.fmtTime(r.ms) : (r.ms / 1000).toFixed(1) + 's';
+      const t = document.createElement('b'); t.textContent = m.fmt(r[m.col]);
       li.append(n, t); list.appendChild(li);
     });
   }
   loadBoard();
-  sb.channel('scores-live').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'scores' }, () => loadBoard()).subscribe();
+  addEventListener('arcade:switch', e => { current = e.detail; loadBoard(); });
+  sb.channel('scores-live').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'scores' },
+    p => { if ((p.new.game || 'maze') === current) loadBoard(); }).subscribe();
 
-  let pendingMs = 0;
-  const form = document.getElementById('score-form'), nameIn = document.getElementById('score-name'), sStatus = document.getElementById('score-status');
-  addEventListener('game:won', e => {
-    pendingMs = e.detail.ms; form.hidden = false; sStatus.textContent = '';
-    nameIn.value = myName; setTimeout(() => nameIn.focus(), 50);
+  const pending = {};
+  addEventListener('arcade:result', e => {
+    const { game, value } = e.detail; pending[game] = value;
+    const f = document.querySelector(`.score-form[data-game="${game}"]`);
+    document.querySelector(`.score-status[data-game="${game}"]`).textContent = '';
+    f.hidden = false; const inp = f.querySelector('input'); inp.value = myName; setTimeout(() => inp.focus(), 50);
   });
-  async function saveScore() {
-    const name = nameIn.value.trim();
-    if (!name) { sStatus.textContent = 'Add a name for the leaderboard.'; return; }
-    if (!pendingMs) return;
-    const btn = document.getElementById('score-save'); btn.disabled = true; sStatus.textContent = 'Saving…';
-    const { data, error } = await sb.from('scores').insert({ name, ms: pendingMs }).select('id').single();
-    btn.disabled = false;
-    if (error) { sStatus.textContent = 'Couldn’t save that time. Try again.'; return; }
-    window.setVisitorName(name); pendingMs = 0; form.hidden = true;
-    sStatus.textContent = 'Saved. Check the leaderboard.'; loadBoard(data.id);
-  }
-  document.getElementById('score-save').onclick = saveScore;
-  nameIn.addEventListener('keydown', e => { if (e.key === 'Enter') saveScore(); });
+  document.querySelectorAll('.score-form').forEach(f => {
+    const game = f.dataset.game, inp = f.querySelector('input'), btn = f.querySelector('button');
+    const status = document.querySelector(`.score-status[data-game="${game}"]`);
+    async function save() {
+      const name = inp.value.trim();
+      if (!name) { status.textContent = 'Add a name for the leaderboard.'; return; }
+      if (pending[game] == null) return;
+      btn.disabled = true; status.textContent = 'Saving…';
+      const row = { name, game }; row[META[game].col] = pending[game];
+      const { data, error } = await sb.from('scores').insert(row).select('id').single();
+      btn.disabled = false;
+      if (error) { status.textContent = 'Couldn’t save that. Try again.'; return; }
+      window.setVisitorName(name); pending[game] = null; f.hidden = true;
+      status.textContent = 'Saved. Check the leaderboard.';
+      if (game === current) loadBoard(game, data.id);
+    }
+    btn.onclick = save;
+    inp.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') save(); });
+  });
 
   /* ---------- global bug counter ---------- */
   const allWrap = document.getElementById('bugs-all-wrap'), allEl = document.getElementById('bugs-all');

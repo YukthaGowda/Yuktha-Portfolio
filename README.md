@@ -19,6 +19,8 @@ Plain HTML, CSS and JavaScript. No build step.
 | `supabase.sql` | Database setup, run once |
 | `supabase-v2.sql` | Leaderboard and bug counter, run once after `supabase.sql` |
 | `bugs.js` | Bugs that crawl across the page |
+| `arcade.js` | The arcade switcher plus Hallucination or Fact? and Injection Defense |
+| `supabase-v3.sql` | Lets the leaderboard store scores for all three games, run once after `supabase-v2.sql` |
 | `lab.js` | Career trace, retrieval playground, agent workflow, threshold toy and the tool-call contact |
 
 ## Run it locally
@@ -76,3 +78,13 @@ Every `git push` to `main` redeploys the site automatically.
 - **Career as a run trace:** each job is a span with inputs, outputs and a timeline bar. Edit the `SPANS` list at the top of `lab.js` to change the fun inputs and outputs.
 - **The lab:** a BM25 retrieval playground over the resume, the Causal Design Agent workflow with validators (edit `STAGES` in `lab.js` to match your real stage names), and a threshold slider for the autoimmune model.
 - **Contact as a tool call:** `send_email(...)` with editable arguments and a Run button.
+
+## Version 4: the arcade
+
+The game section is now an arcade with three cartridges, each with its own leaderboard:
+
+- **Maze run:** the original game.
+- **Hallucination or Fact?:** 10 claims about you, 8 seconds each, true or hallucinated. Edit the `CLAIMS` list in `arcade.js` to add your own (keep the true ones accurate).
+- **Injection Defense:** block prompt injections, let real requests through. Edit `SAFE` and `BAD` in `arcade.js` to change the messages.
+
+Run `supabase-v3.sql` once in the Supabase SQL Editor so the leaderboard can save scores for the new games.

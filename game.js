@@ -29,7 +29,7 @@ const cv = document.getElementById('game'), g = cv.getContext('2d');
 let T = 30, dpr = 1, board = null;
 function resize() {
   dpr = Math.min(devicePixelRatio || 1, 2);
-  const w = cv.parentElement.clientWidth; T = w / COLS;
+  const w = cv.parentElement.clientWidth; if (!w) return; T = w / COLS;
   cv.width = Math.round(w * dpr); cv.height = Math.round(T * ROWS * dpr);
   cv.style.height = (T * ROWS) + 'px';
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -139,7 +139,7 @@ function drawChip(c) {
   g.restore();
 }
 function draw() {
-  if (!board) return;
+  if (!board || !board.width || !board.height) return;
   g.drawImage(board, 0, 0, board.width, board.height, 0, 0, COLS * T, ROWS * T);
   chips.forEach(c => { if (!c.got) drawChip(c); });
   bugs.forEach((b, i) => { const [x, y] = pos(b); g.globalAlpha = grace > 0 && state === 'play' ? .45 : 1; drawBug(x, y, b.c, b.dir, i); });
@@ -174,7 +174,7 @@ function hud() {
 function start() {
   if (state === 'won') { unlocked.clear(); document.querySelectorAll('.found').forEach(f => f.hidden = true); }
   if (unlocked.size === 0) { runMs = 0; timerEl.textContent = fmt(0); }
-  document.getElementById('score-form').hidden = true; document.getElementById('score-status').textContent = '';
+  document.querySelector('.score-form[data-game="maze"]').hidden = true; document.querySelector('.score-status[data-game="maze"]').textContent = '';
   reset(true); ov.hidden = true; state = 'play';
 }
 function end(kind) {
@@ -184,10 +184,17 @@ function end(kind) {
     ovT.textContent = 'All 8 unlocked in ' + fmt(runMs);
     ovP.textContent = 'You’ve seen the whole resume. Now imagine what I could build on your team.';
     ovB.textContent = 'Play again';
-    dispatchEvent(new CustomEvent('game:won', { detail: { ms: Math.round(runMs) } }));
+    dispatchEvent(new CustomEvent('arcade:result', { detail: { game: 'maze', value: Math.round(runMs) } }));
   }
 }
-ovB.onclick = start;
+ovB.onclick = () => { if (state === 'paused') { ov.hidden = true; state = 'play'; grace = 1; } else start(); };
+addEventListener('arcade:pause', e => {
+  if (e.detail !== 'maze' && (state === 'play' || state === 'hit')) {
+    state = 'paused'; ov.hidden = false;
+    ovT.textContent = 'Paused'; ovP.textContent = `Your run is waiting. ${unlocked.size}/8 chips so far.`; ovB.textContent = 'Resume';
+    document.querySelector('.score-form[data-game="maze"]').hidden = true;
+  }
+});
 
 const dlg = document.getElementById('dlg');
 function collect(s) {
