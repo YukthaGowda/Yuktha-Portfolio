@@ -40,7 +40,7 @@
 <header class="top">
   <a class="mark" href="#top">yuktha.gowda</a>
   <nav aria-label="Main">
-    <a href="#play">Play</a><a href="#work">Work</a><a href="#lab">Lab</a><a href="#wall" id="nav-wall" hidden>Wall</a><a href="#contact">Contact</a>
+    <a href="#play">Play</a><a href="#work">Work</a><a href="#vend">Capsules</a><a href="#wall" id="nav-wall" hidden>Wall</a><a href="#contact">Contact</a>
   </nav>
   <span class="presence" id="presence" hidden><i></i><b id="presence-n">1</b> <span id="presence-l">here now</span></span>
 </header>
@@ -177,52 +177,46 @@
     <div class="strip" id="proj-strip" tabindex="0" aria-label="Projects, scroll sideways"></div>
   </section>
 
-  <!-- lab -->
-  <section id="lab" class="band">
+  <!-- the yuktha-o-matic -->
+  <section id="vend" class="band">
     <div class="sec-head">
-      <h2>The lab: don’t read it, poke it</h2>
-      <p class="bubble"><b>Agent:</b> two of Yuktha’s ideas, shrunk into toys. Everything runs right here in your browser.</p>
+      <h2>The Yuktha-o-matic</h2>
+      <p class="bubble"><b>Agent:</b> every capsule holds a tiny piece of Yuktha. One coin each. Don’t worry, she’s paying.</p>
     </div>
-
-    <div class="lab">
-      <div class="lab-copy">
-        <h3>An agent with a conscience</h3>
-        <p>Her Causal Design Agent drafts with an LLM, then rule-based validators check every draft. Bad drafts get blocked and sent back for revision instead of reaching the user.</p>
-        <p class="fine">A simplified version of the 8-stage LangGraph workflow. Turn on chaos mode to see the validators earn their keep.</p>
-      </div>
-      <div class="lab-box">
-        <div class="graph" id="graph"></div>
-        <div class="graph-ctl">
-          <button class="key small" id="g-run">Run the agent</button>
-          <label class="toggle"><input type="checkbox" id="g-chaos"> Chaos mode</label>
-        </div>
-        <div class="graph-io">
-          <pre class="state" id="g-state" aria-label="Agent state"></pre>
-          <ol class="glog" id="g-log" aria-live="polite"></ol>
-        </div>
-      </div>
-    </div>
-
-    <div class="lab">
-      <div class="lab-copy">
-        <h3>Where do you draw the line?</h3>
-        <p>Her autoimmune model had to catch at least 90% of sick patients while keeping false alarms under 15%. Drag the threshold and feel the tradeoff a doctor would.</p>
-        <p class="fine">Simulated patient scores, tuned to her model’s AUC of 0.93. Not real patient data.</p>
-      </div>
-      <div class="lab-box">
-        <canvas id="dist" aria-label="Score distributions for healthy and sick patients with a threshold line"></canvas>
-        <input type="range" id="thr" min="-3" max="5" step="0.01" value="0.6" aria-label="Decision threshold">
-        <div class="thr-out">
-          <canvas id="roc" aria-label="ROC curve"></canvas>
-          <div>
-            <div class="stat"><span>Sick patients caught</span><b id="t-sens"></b><i>target 90% or more</i></div>
-            <div class="stat"><span>Healthy people flagged</span><b id="t-fpr"></b><i>target under 15%</i></div>
-            <p class="verdict" id="t-verdict"></p>
+    <div class="vend-wrap">
+      <div class="machine">
+        <div class="m-top" aria-hidden="true"><span>YUKTHA</span><span>O</span><span>MATIC</span></div>
+        <div class="m-body">
+          <div class="m-glass" id="m-glass" aria-hidden="true"></div>
+          <div class="m-panel">
+            <div class="m-screen" id="m-screen" role="status" aria-live="polite"><span id="m-line1">INSERT COIN</span><span id="m-line2">tap the coin</span></div>
+            <div class="m-slot" aria-hidden="true"><i></i></div>
+            <button class="m-coin" id="m-coin" aria-label="Insert a coin"><span>Y</span></button>
+            <div class="m-keys" id="m-keys" role="group" aria-label="Pick a slot"></div>
           </div>
         </div>
+        <div class="m-tray">
+          <span class="m-flap" aria-hidden="true">PUSH</span>
+          <button class="tray-cap" id="tray-cap" hidden aria-label="Open your capsule"></button>
+        </div>
+        <div class="m-feet" aria-hidden="true"><i></i><i></i></div>
+      </div>
+      <div class="vend-side">
+        <h3>Your collection</h3>
+        <p class="col-count" id="col-count">0 of 8 capsules opened</p>
+        <ul class="stickers" id="stickers"><li class="empty">Nothing yet. Feed the machine.</li></ul>
+        <button class="ghost small" id="restock" hidden>Restock the machine</button>
       </div>
     </div>
   </section>
+
+  <dialog class="cap-dlg" id="cap-dlg" aria-labelledby="cap-title">
+    <div class="cap-open" aria-hidden="true"><span class="half top"></span><span class="half bottom"></span></div>
+    <p class="cap-code" id="cap-code"></p>
+    <h3 id="cap-title"></h3>
+    <p id="cap-text"></p>
+    <div class="cap-btns"><button class="key small" id="cap-keep">Keep it</button><a class="key small alt" id="cap-cta" href="#contact" hidden>Email Yuktha</a></div>
+  </dialog>
 
   <!-- skills -->
   <section id="skills" class="band">
@@ -312,7 +306,8 @@
 <script src="game.js"></script>
 <script src="live.js"></script>
 <script src="bugs.js"></script>
-<script src="lab.js"></script>
+<script src="contact.js"></script>
+<script src="vending.js"></script>
 <script src="arcade.js"></script>
 </body>
 </html>

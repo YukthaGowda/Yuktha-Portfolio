@@ -17,11 +17,11 @@ Plain HTML, CSS and JavaScript. No build step.
 | `live.js` | Live visitor counter and guestbook (Supabase) |
 | `config.js` | Your Supabase keys go here |
 | `supabase.sql` | Database setup, run once |
-| `supabase-v2.sql` | Leaderboard and bug counter, run once after `supabase.sql` |
+| `supabase-arcade.sql` | Leaderboard and bug counter, run once after `supabase.sql` |
 | `bugs.js` | Bugs that crawl across the page |
 | `arcade.js` | The arcade switcher plus Hallucination or Fact? and Injection Defense |
-| `supabase-v3.sql` | Lets the leaderboard store scores for all three games, run once after `supabase-v2.sql` |
-| `lab.js` | Career trace, retrieval playground, agent workflow, threshold toy and the tool-call contact |
+| `vending.js` | The Yuktha-o-matic vending machine. Edit `CAPSULES` to change what’s inside |
+| `contact.js` | The `send_email(...)` tool-call contact section |
 
 ## Run it locally
 
@@ -88,3 +88,7 @@ The game section is now an arcade with three cartridges, each with its own leade
 - **Injection Defense:** block prompt injections, let real requests through. Edit `SAFE` and `BAD` in `arcade.js` to change the messages.
 
 Run `supabase-v3.sql` once in the Supabase SQL Editor so the leaderboard can save scores for the new games.
+
+## Version 5: the Yuktha-o-matic
+
+The lab is replaced by a vending machine. Visitors insert a coin, pick a slot and open a capsule with a fact about Yuktha. Edit the `CAPSULES` list at the top of `vending.js` to change the capsules. `soldOut: true` makes a joke slot, `golden: true` makes the rare one.
